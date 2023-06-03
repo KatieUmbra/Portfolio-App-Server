@@ -1,0 +1,72 @@
+### register user
+
+POST http://localhost:8080/test/register
+Content-Type: application/json
+
+{
+    "username": "test{{count}}",
+    "password": "test {{count}}",
+    "email": "email{{count}}@email.email",
+    "firstName": "test {{count}}",
+    "lastName": "test {{count}}"
+}
+
+### login and generate session
+
+POST http://localhost:8080/test/login
+Content-Type: application/json
+
+{
+    "identifier": "test{{count}}",
+    "password": "test {{count}}"
+}
+
+### authenticate
+
+GET http://localhost:8080/test/auth
+Cookie: session=bcdf52673ee15a767e5c357c15c17f69
+Content-Type: text/plain
+
+### Authenticated request
+
+GET http://localhost:8080/test/protectedRoute
+Cookie: session=3c76352a1eeb963f554782d46a598641
+
+### not authenticated request
+
+GET http://localhost:8080/test/protectedRoute
+
+### registrar mama
+
+POST http://localhost:8080/test/register
+Content-Type: application/json
+
+{
+    "username": "gloriaMontita",
+    "password": "1234",
+    "email": "gloria1p.montoyao@gmail.com",
+    "firstName": "Gloria",
+    "lastName": "Montoya"
+}
+
+### logeo mama
+POST http://localhost:8080/test/login
+Content-Type: application/json
+
+{
+  "identifier": "morenastika",
+  "password": "1234"
+}
+
+### registrar mama
+
+POST http://localhost:8080/test/register
+Content-Type: application/json
+
+{
+  "username": "morenastika",
+  "password": "1234",
+  "email": "sdfkhjghsidkrfghsudjfg@gmail.com",
+  "firstName": "Julie",
+  "lastName": "Martinez"
+}
