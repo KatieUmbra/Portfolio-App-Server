@@ -10,8 +10,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Application.configureAuthentication() {
     install(Authentication) {
-        session<UserSessionId>("auth"){
-            validate {uniqueId ->
+        session<UserSessionId>("auth") {
+            validate { uniqueId ->
                 val session = transaction {
                     UserSessionDAO
                         .find { SessionsTable.uniqueId eq uniqueId.id }
@@ -28,7 +28,7 @@ fun Application.configureAuthentication() {
 
 fun Application.validateSession(session: UserSession?): UserSessionId? {
     val databaseSession = if (session == null) null
-        else transaction {
+    else transaction {
         UserSessionDAO
             .find {
                 SessionsTable.identifier eq session.identifier
@@ -39,20 +39,33 @@ fun Application.validateSession(session: UserSession?): UserSessionId? {
     }
     return if (session == databaseSession) {
         UserSessionId(session!!.uniqueId)
-    }
-        else {
+    } else {
         null
     }
 }
 
-fun Application.validateSessionId(session: UserSessionId): Boolean {
-    val databaseSession = transaction { UserSessionDAO.find {
+fun validateSessionId(session: UserSessionId): Boolean {
+    val databaseSession = transaction {
+        UserSessionDAO.find {
             SessionsTable.uniqueId eq session.id
-        }.firstOrNull()?.let { UserSession(it.uniqueId, it.identifier, it.hashedPassword) } }
-    val userData = transaction { UserDataDAO.find {
-        (UserDataTable.username eq (databaseSession?.identifier ?: "")) or
-        (UserDataTable.email eq (databaseSession?.identifier ?: ""))
-    }.firstOrNull()?.let { UserData(it.username, it.password, it.email, it.firstName, it.lastName) } }
+        }.firstOrNull()?.let { UserSession(it.uniqueId, it.identifier, it.hashedPassword) }
+    }
+    val userData = transaction {
+        UserDataDAO.find {
+            (UserDataTable.username eq (databaseSession?.identifier ?: "")) or
+                    (UserDataTable.email eq (databaseSession?.identifier ?: ""))
+        }.firstOrNull()?.let { UserData(it.username, it.password, it.email, it.firstName, it.lastName) }
+    }
     if (databaseSession == null || userData == null) return false
-    return databaseSession.hashedPassword == userData.password
+    return if (databaseSession.hashedPassword != userData.password) {
+        eliminateSession(session)
+        false
+    } else true
+}
+
+fun eliminateSession(session: UserSessionId) {
+    val se = transaction {
+        UserSessionDAO.find { SessionsTable.uniqueId eq session.id }.firstOrNull()
+    }
+    se?.delete()
 }

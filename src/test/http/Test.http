@@ -30,7 +30,6 @@ Content-Type: text/plain
 ### Authenticated request
 
 GET http://localhost:8080/test/protectedRoute
-Cookie: session=3c76352a1eeb963f554782d46a598641
 
 ### not authenticated request
 
@@ -70,3 +69,7 @@ Content-Type: application/json
   "firstName": "Julie",
   "lastName": "Martinez"
 }
+
+### Check profanity
+GET https://api.api-ninjas.com/v1/profanityfilter?text=fuck off piece of shit
+X-Api-Key: 2vb3U9qp96xSb7ExbUl8/w==Lij2ni89TNu2Km7I

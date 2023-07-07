@@ -1,15 +1,14 @@
 package dev.kaytea.portfolio.data
 
-import dev.kaytea.portfolio.envVars
-import io.ktor.server.application.Application
-import io.ktor.server.application.log
+import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database
 
-fun Application.databaseConnect() {
+fun Application.databaseConnect(host: String, port: String, name: String) {
     Database.connect(
-        "jdbc:mysql://192.168.1.20:3306/Portfolio",
+        // Name: Portfolio
+        "jdbc:mysql://$host:$port/$name",
         driver = "com.mysql.cj.jdbc.Driver",
-        user = "root", password = envVars["SDP"]!!
+        user = "root", password = System.getenv("SDP")
     )
     log.info("Connected to database")
 }

@@ -1,4 +1,4 @@
 package dev.kaytea.portfolioTest
 
-class EnvTest {
+class ProfanityTest {
 }

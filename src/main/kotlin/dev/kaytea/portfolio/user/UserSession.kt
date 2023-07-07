@@ -7,7 +7,8 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
 @Serializable
-data class UserSessionId(val id: Int): Principal
+@JvmInline
+value class UserSessionId(val id: Int) : Principal
 
 @Serializable
 data class UserSession(
@@ -16,8 +17,9 @@ data class UserSession(
     val hashedPassword: String
 ) : Principal
 
-class UserSessionDAO(id: EntityID<Int>): IntEntity(id) {
+class UserSessionDAO(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<UserSessionDAO>(SessionsTable)
+
     var uniqueId by SessionsTable.uniqueId
     var identifier by SessionsTable.identifier
     var hashedPassword by SessionsTable.hashedPassword

@@ -1,25 +1,18 @@
 package dev.kaytea.portfolio.plugins.routing
 
-import dev.kaytea.portfolio.envVars
 import dev.kaytea.portfolio.plugins.authentication.validateLogin
 import dev.kaytea.portfolio.plugins.authentication.validateSessionId
 import dev.kaytea.portfolio.user.UserData
 import dev.kaytea.portfolio.user.UserDataTable
 import dev.kaytea.portfolio.user.UserLoginData
 import dev.kaytea.portfolio.user.UserSessionId
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
-import io.ktor.server.application.call
-import io.ktor.server.auth.authenticate
-import io.ktor.server.request.receive
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import io.ktor.server.routing.route
-import io.ktor.server.routing.routing
-import io.ktor.server.sessions.get
-import io.ktor.server.sessions.sessions
-import io.ktor.server.sessions.set
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
@@ -41,9 +34,7 @@ fun Application.testRouting() {
                     }.firstOrNull()
                 }
                 if (foundUser == null) {
-                    // consistent seeding
-                    val salt = "$2a$15$${this@testRouting.envVars["SSS"]!!}"
-                    val hashPassword = BCrypt.hashpw(user.password, salt)
+                    val hashPassword = BCrypt.hashpw(user.password, BCrypt.gensalt(10))
                     val newUser = user.copy(password = hashPassword)
                     response = HttpStatusCode.Created
                     // storing hashed password
@@ -62,7 +53,7 @@ fun Application.testRouting() {
             post("/login") {
                 val user = call.receive<UserLoginData>()
                 var response = HttpStatusCode.Unauthorized
-                val authId = this@testRouting.validateLogin(user)
+                val authId = validateLogin(user)
                 if (authId != null) {
                     response = HttpStatusCode.OK
                     call.sessions.set(UserSessionId(authId))
@@ -74,7 +65,7 @@ fun Application.testRouting() {
                 var responseCode = HttpStatusCode.BadRequest
                 var responseBody = "Unauthorized"
                 session?.let {
-                    if (this@testRouting.validateSessionId(session)) {
+                    if (validateSessionId(session)) {
                         responseCode = HttpStatusCode.Accepted
                         responseBody = "Authenticated"
                         call.sessions.set(session)
